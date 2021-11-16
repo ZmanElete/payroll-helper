@@ -18,6 +18,7 @@ const List<String> titleOptionsKeys = [
 
 class Config {
   late VagueString pk;
+  late VagueString title;
   List<VagueString> columns = [];
   List<VagueString> titleOptions = [];
   List<VagueString> titles = [];
@@ -40,6 +41,7 @@ class Config {
           if (columnKeys.contains(key)) {
             columns.add(entry);
             if (key == 'ssn') pk = entry;
+            if (key == 'title') title = entry;
           } else if (titleOptionsKeys.contains(key)) {
             titleOptions.add(entry);
           } else {
@@ -49,6 +51,15 @@ class Config {
       }
     }
     _checkForKeyExistence();
+  }
+
+  VagueString? getTitle(String string) {
+    var matches = titles.where(
+      (t) => t.interpritations.contains(string),
+    );
+    if (matches.isNotEmpty) {
+       return matches.first;
+    }
   }
 
   void _checkForKeyExistence() {

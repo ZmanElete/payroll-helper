@@ -60,12 +60,6 @@ class TemplateFiller {
     return File((fileList.first).path);
   }
 
-  /// Map of <PK, Line>, line is set to '' when it is added to the dups list
-  Map<String, String> pkLines = {};
-
-  /// Contains Lines of duplicate PKs
-  List<String> dups = [];
-
   /// List of inputLines with no match in template
   List<String> notFoundInTemplate = [];
 
@@ -82,7 +76,14 @@ class TemplateFiller {
     for (String line in template.lines) {
       var row = commaSeparatedSplit(line);
       String pk = template.getColumn(config.pk, row);
-      Map<VagueString, String>? inputRow = input.rows[pk];
+      String title = template.getColumn(config.title, row);
+      var rows = input.rows[pk]!;
+      Map<VagueString, String>? inputRow;
+      for (var key in rows.keys) {
+        if (key.interpritations.contains(title)) {
+          inputRow = rows[key];
+        }
+      }
       if (inputRow != null) {
         outputLines.add(template.replaceColumns(row, inputRow));
       } else {
@@ -99,14 +100,14 @@ class TemplateFiller {
     )..createSync();
     File output = File(newOutputDir.path + '\\upload.csv');
     output.writeAsStringSync(outputLines.join('\n') + '\n');
-    if (dups.isNotEmpty) {
+    if (input.dups.isNotEmpty) {
       File duplicates = File(newOutputDir.path + '\\duplicates.csv');
-      duplicates.writeAsStringSync(dups.join('\n') + '\n');
+      duplicates.writeAsStringSync(input.dups.join('\n') + '\n');
     }
-    if (notFoundInTemplate.isNotEmpty) {
-      File notFound = File(newOutputDir.path + '\\not-found.csv');
-      notFound.writeAsStringSync(notFoundInTemplate.join('\n') + '\n');
-    }
+    // if (notFoundInTemplate.isNotEmpty) {
+    //   File notFound = File(newOutputDir.path + '\\not-found.csv');
+    //   notFound.writeAsStringSync(notFoundInTemplate.join('\n') + '\n');
+    // }
     print('Completed Press Enter to contine...');
     stdin.readLineSync(encoding: utf8);
   }

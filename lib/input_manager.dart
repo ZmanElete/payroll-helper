@@ -6,7 +6,7 @@ import 'package:console_simple/vague_string.dart';
 
 class InputManager {
   List<FileSystemEntity> fseList;
-  Map<String, Map<VagueString, String>> rows = {};
+  Map<String, Map<VagueString, Map<VagueString, String>>> rows = {};
   final Config _config;
   VagueString lineKey = VagueString(key: 'line');
   List<String> dups = [];
@@ -68,7 +68,11 @@ class InputManager {
       if (pk != "") {
         //If the key exists we have found a dup.
         if (!rows.containsKey(pk)) {
-          rows[pk] = row;
+          var idRows = rows[pk];
+          if(idRows.containsKey(key))
+          String titleString = row[_config.title]!;
+          VagueString title = _config.getTitle(titleString) ?? VagueString(key: 'titleString');
+          rows[pk]![title] = row;
         } else {
           Map firstValue = rows[pk]!;
           if (firstValue.isNotEmpty) {
