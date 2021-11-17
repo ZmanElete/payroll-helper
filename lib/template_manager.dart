@@ -45,6 +45,7 @@ class TemplateManager {
   String replaceColumns(List<String> row, Map<VagueString, String> inputRow) {
     List<VagueString> replaceColumns = _config.columns.where((c) => c != _config.pk && c != _config.title).toList();
     String title = getColumn(_config.title, row);
+
     var skipTitles = _config.titleOptions.where((to) => to.key == 'skip_titles');
     var onlyTipsTitles = _config.titleOptions.where((to) => to.key == 'tips_only_titles');
     if (skipTitles.isNotEmpty && skipTitles.first.interpritations.contains(title)) {

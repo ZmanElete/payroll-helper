@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:console_simple/config.dart';
 import 'package:console_simple/template_filler.dart';
 import 'package:console_simple/utils.dart';
@@ -7,7 +5,7 @@ import 'package:console_simple/utils.dart';
 void main(List<String> arguments) async {
   rotateLogs();
   String s = Config.slash;
-  // try {
+  try {
     var templateFiller = TemplateFiller(
       configPath: '${s}config.csv',
       templateDirPath: '${s}template',
@@ -15,7 +13,7 @@ void main(List<String> arguments) async {
       inputDirPath: '${s}input',
     );
     templateFiller.run();
-  // } catch (e) {
-  //   errorMessage(e.toString());
-  // }
+  } catch (e) {
+    errorMessage(e.toString());
+  }
 }

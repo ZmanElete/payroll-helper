@@ -96,7 +96,7 @@ class TemplateFiller {
         title = config.titles.firstWhere((t) => t.interpritations.contains(titleString));
       }
       Map<VagueString, String>? inputRow = input.getRow(pk, title);
-      if (inputRow != null) {
+      if (inputRow != null && inputRow.isNotEmpty) {
         outputLines.add(template.replaceColumns(row, inputRow));
       } else {
         outputLines.add(line);
