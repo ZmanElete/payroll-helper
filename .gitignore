@@ -7,3 +7,5 @@ build/
 *.csv
 logs/
 output/
+!config.csv
+*.exe
