@@ -69,11 +69,20 @@ class InputManager {
       if (pk != "") {
         //See if the title exists in titles given. Otherwise use the default title.
         var title = _config.getTitle(titleString) ?? defaultTitle;
-        Map<VagueString, String>? _existingRow = getRow(pk, title);
-        //If the key exists we have found a dup.
-        if (_existingRow == null) {
+        // We need to see if there are any rows that have this id already in our template rows to determine
+        // if there is duplicate information that MUST be separated
+        Map<VagueString, Map<VagueString, String>>? pkRows = rows[pk];
+        if (pkRows == null || pkRows.isEmpty) {
+          //No one with this id exists
           setRow(pk, title, row);
         } else {
+          Map<VagueString, String> _existingRow = pkRows.values.first;
+          if (title == defaultTitle && pkRows.keys.first == defaultTitle) {
+            log(
+              'ACTION RECOMMENDED: There are two job titles for the same user than are not handled in the config.csv\n'
+              ' - TITLES: ${_existingRow[_config.title]} and ${title}'
+            );
+          }
           if (_existingRow.isNotEmpty) {
             dups.add(_existingRow[lineKey]!);
             //Remove line from rows so that it is not added multiple times

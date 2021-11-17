@@ -37,8 +37,8 @@ List<String> commaSeparatedSplit(String line) {
   const replaceChar = '#|%|#';
   //Removed commas that exist in the column (not delimeters)
   var strippedCommas = line.replaceAllMapped(
-    RegExp("\"(.*),(.*)\""),
-    (m) => '${m[1]}$replaceChar${m[2]}',
+    RegExp("(\"[^\"]*\")"),
+    (m) => m[1]!.replaceAll(',', replaceChar),
   );
   var cleaned = strippedCommas.replaceAll('"', '');
   List<String> splitOnComma = cleaned.split(',');
