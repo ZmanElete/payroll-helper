@@ -3,7 +3,10 @@ class VagueString {
   Set<String> interpritations;
 
   VagueString({required this.key, this.interpritations = const {}}) {
-    interpritations.add(key);
+    interpritations = {
+      ...interpritations,
+      key,
+    };
   }
 
   @override

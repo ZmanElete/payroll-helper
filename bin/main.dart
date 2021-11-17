@@ -1,17 +1,21 @@
+import 'dart:io';
+
+import 'package:console_simple/config.dart';
 import 'package:console_simple/template_filler.dart';
 import 'package:console_simple/utils.dart';
 
 void main(List<String> arguments) async {
   rotateLogs();
-  try {
+  String s = Config.slash;
+  // try {
     var templateFiller = TemplateFiller(
-      configPath: '\\config.txt',
-      templateDirPath: '\\template',
-      outputDirPath: '\\output',
-      inputDirPath: '\\input',
+      configPath: '${s}config.csv',
+      templateDirPath: '${s}template',
+      outputDirPath: '${s}output',
+      inputDirPath: '${s}input',
     );
     templateFiller.run();
-  } catch (e) {
-    errorMessage(e.toString());
-  }
+  // } catch (e) {
+  //   errorMessage(e.toString());
+  // }
 }

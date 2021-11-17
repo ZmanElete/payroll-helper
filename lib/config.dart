@@ -17,6 +17,8 @@ const List<String> titleOptionsKeys = [
 ];
 
 class Config {
+  static String slash = !Platform.isWindows ? '/' : '\\';
+
   late VagueString pk;
   late VagueString title;
   List<VagueString> columns = [];
@@ -29,10 +31,10 @@ class Config {
     var lines = file.readAsLinesSync();
     for (String s in lines) {
       if (s.isNotEmpty && s[0] != '#') {
-        var args = s.split('=');
-        if (args.length == 2) {
+        var args = commaSeparatedSplit(s);
+        if (args.length > 1) {
           String key = args[0];
-          Set<String> interpritations = commaSeparatedSplit(args[1]).toSet();
+          Set<String> interpritations = args.toSet();
           var entry = VagueString(
             key: key,
             interpritations: interpritations,
@@ -58,7 +60,7 @@ class Config {
       (t) => t.interpritations.contains(string),
     );
     if (matches.isNotEmpty) {
-       return matches.first;
+      return matches.first;
     }
   }
 

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:console_simple/config.dart';
+
 void errorMessage(String message) {
   log('');
   log(message);
@@ -12,7 +14,7 @@ void errorMessage(String message) {
 var now = DateTime.now();
 var logFile = File(
   Directory.current.path +
-      "\\logs\\${now.year}-${now.month}-${now.day}_${now.hour}-${now.minute}-${now.second}.${now.millisecond}-log.txt",
+      "${Config.slash}logs${Config.slash}${now.year}-${now.month}-${now.day}_${now.hour}-${now.minute}-${now.second}.${now.millisecond}-log.txt",
 )..createSync();
 
 void log(String message) {
@@ -21,7 +23,7 @@ void log(String message) {
 }
 
 void rotateLogs() {
-  var logDir = Directory(Directory.current.path + "\\logs")..createSync();
+  var logDir = Directory(Directory.current.path + "${Config.slash}logs")..createSync();
   var files = logDir.listSync();
   if (files.length > 5) {
     files.sort((fse1, fse2) => fse1.path.compareTo(fse2.path));

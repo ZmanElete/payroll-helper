@@ -10,6 +10,8 @@ class InputManager {
   final Config _config;
   VagueString lineKey = VagueString(key: 'line');
   List<String> dups = [];
+  List<String> noId = [];
+  final defaultTitle = VagueString(key: 'default-garbdge-that-wont-be-a-title');
 
   InputManager({required this.fseList, required Config config}) : _config = config {
     if (fseList.isEmpty) {
@@ -39,10 +41,8 @@ class InputManager {
     List<String> columnHeaders = commaSeparatedSplit(lines.first);
     for (int i = 0; i < columnHeaders.length; i++) {
       var header = columnHeaders[i];
-      for (var c in _config.columns) {
-        //Vague String overrides == to allow for Strings
-        // ignore: unrelated_type_equality_checks
-        if (header == c) {
+      for (VagueString c in _config.columns) {
+        if (c.interpritations.contains(header)) {
           columnIndexs[c] = i;
         }
       }
@@ -65,27 +65,42 @@ class InputManager {
       row[lineKey] = line;
 
       var pk = row[_config.pk]!;
+      var titleString = row[_config.title]!;
       if (pk != "") {
+        //See if the title exists in titles given. Otherwise use the default title.
+        var title = _config.getTitle(titleString) ?? defaultTitle;
+        Map<VagueString, String>? _existingRow = getRow(pk, title);
         //If the key exists we have found a dup.
-        if (!rows.containsKey(pk)) {
-          var idRows = rows[pk];
-          if(idRows.containsKey(key))
-          String titleString = row[_config.title]!;
-          VagueString title = _config.getTitle(titleString) ?? VagueString(key: 'titleString');
-          rows[pk]![title] = row;
+        if (_existingRow == null) {
+          setRow(pk, title, row);
         } else {
-          Map firstValue = rows[pk]!;
-          if (firstValue.isNotEmpty) {
-            dups.add(firstValue[lineKey]);
+          if (_existingRow.isNotEmpty) {
+            dups.add(_existingRow[lineKey]!);
             //Remove line from rows so that it is not added multiple times
             //keep key so odd numbers are still counted as dups
-            rows[pk] = {};
+            setRow(pk, title, {});
           }
           dups.add(line);
         }
       } else {
         log('Row in ${file.path} did not have a ssn:\n $line');
+        noId.add(line);
       }
     }
+  }
+
+  Map<VagueString, String>? getRow(String pk, VagueString title) {
+    Map<VagueString, Map<VagueString, String>>? pkRows = rows[pk];
+    if (pkRows != null) {
+      Map<VagueString, String>? row = pkRows[title];
+      if (row != null) {
+        return row;
+      }
+    }
+  }
+
+  void setRow(String pk, VagueString title, Map<VagueString, String> value) {
+    rows[pk] = rows[pk] ?? {};
+    rows[pk]![title] = value;
   }
 }

@@ -28,7 +28,18 @@ class TemplateFiller {
     required String outputDirPath,
   }) {
     String curr = Directory.current.path;
-    File configFile = File(curr + configPath);
+    File configFile = File(curr + configPath)..createSync();
+    if (configFile.readAsStringSync().isEmpty) {
+      configFile.writeAsStringSync(
+        'ssn\n'
+        'regular_hours\n'
+        'overtime_hours\n'
+        'paycheck_tips\n'
+        'title\n'
+        'skip_titles\n'
+        'tips_only_titles\n',
+      );
+    }
     Config config = Config(configFile);
     Directory inputDir = Directory(curr + inputDirPath)..createSync();
     Directory outputDir = Directory(curr + outputDirPath)..createSync();
@@ -76,36 +87,38 @@ class TemplateFiller {
     for (String line in template.lines) {
       var row = commaSeparatedSplit(line);
       String pk = template.getColumn(config.pk, row);
-      String title = template.getColumn(config.title, row);
-      var rows = input.rows[pk]!;
-      Map<VagueString, String>? inputRow;
-      for (var key in rows.keys) {
-        if (key.interpritations.contains(title)) {
-          inputRow = rows[key];
-        }
+      String titleString = template.getColumn(config.title, row);
+
+      VagueString title = input.defaultTitle;
+      // Vague string overridden == so .contains works on strings
+      // ignore: iterable_contains_unrelated_type
+      if (config.titles.contains(titleString)) {
+        title = config.titles.firstWhere((t) => t.interpritations.contains(titleString));
       }
+      Map<VagueString, String>? inputRow = input.getRow(pk, title);
       if (inputRow != null) {
         outputLines.add(template.replaceColumns(row, inputRow));
       } else {
         outputLines.add(line);
         if (line != template.lines.first) {
-          log('Skipped:\n $line');
+          log('Skipped Line in Template:\n $line');
         }
       }
     }
 
     DateTime now = DateTime.now();
+    String s = Config.slash;
     var newOutputDir = Directory(
-      outputDir.path + '\\${now.year}-${now.month}-${now.day}_${now.hour}-${now.minute}-${now.second}',
+      outputDir.path + '${s}${now.year}-${now.month}-${now.day}_${now.hour}-${now.minute}-${now.second}',
     )..createSync();
-    File output = File(newOutputDir.path + '\\upload.csv');
+    File output = File(newOutputDir.path + '${s}upload.csv');
     output.writeAsStringSync(outputLines.join('\n') + '\n');
     if (input.dups.isNotEmpty) {
-      File duplicates = File(newOutputDir.path + '\\duplicates.csv');
+      File duplicates = File(newOutputDir.path + '${s}duplicates.csv');
       duplicates.writeAsStringSync(input.dups.join('\n') + '\n');
     }
     // if (notFoundInTemplate.isNotEmpty) {
-    //   File notFound = File(newOutputDir.path + '\\not-found.csv');
+    //   File notFound = File(newOutputDir.path + '${s}not-found.csv');
     //   notFound.writeAsStringSync(notFoundInTemplate.join('\n') + '\n');
     // }
     print('Completed Press Enter to contine...');

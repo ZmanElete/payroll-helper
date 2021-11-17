@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'vague_string.dart';
@@ -22,12 +23,8 @@ class TemplateManager {
     List<String> headers = commaSeparatedSplit(lines.first);
     for (int i = 0; i < headers.length; i++) {
       var header = headers[i];
-      // ignored because VagueString overrides == to allow String comparison
-      // ignore: iterable_contains_unrelated_type
-      for (var c in _config.columns) {
-        //Vague String overrides == to allow for Strings
-        // ignore: unrelated_type_equality_checks
-        if (header == c) {
+      for (VagueString c in _config.columns) {
+        if (c.interpritations.contains(header)) {
           indexes[c] = i;
         }
       }
@@ -41,35 +38,34 @@ class TemplateManager {
   }
 
   String getColumn(VagueString key, List<String> row) {
+    assert(_config.columns.contains(key));
     return row[indexes[key]!];
   }
 
   String replaceColumns(List<String> row, Map<VagueString, String> inputRow) {
-    List<ColumnName> columns = [
-      ColumnName.regularHours,
-      ColumnName.overtimeHours,
-      ColumnName.paycheckTips,
-    ];
-    String title = templateRow[templateColumnIndexes['title']!];
-    if (config.titleOptions[TitleOption.skip]!.contains(title)) {
-      return joinOnComma(templateRow);
-    } else if (config.titleOptions[TitleOption.tipsOnly]!.contains(title)) {
-      columns = [
-        ColumnName.paycheckTips,
+    List<VagueString> replaceColumns = _config.columns.where((c) => c != _config.pk && c != _config.title).toList();
+    String title = getColumn(_config.title, row);
+    var skipTitles = _config.titleOptions.where((to) => to.key == 'skip_titles');
+    var onlyTipsTitles = _config.titleOptions.where((to) => to.key == 'tips_only_titles');
+    if (skipTitles.isNotEmpty && skipTitles.first.interpritations.contains(title)) {
+      return joinOnComma(row);
+    } else if (onlyTipsTitles.isNotEmpty && onlyTipsTitles.first.interpritations.contains(title)) {
+      replaceColumns = [
+        _config.columns.firstWhere((to) => to.interpritations.contains('paycheck_tips')),
       ];
     }
 
-    for (ColumnName c in columns) {
-      String columnString = columnToString(c);
-      int templateColumnIndex = templateColumnIndexes[columnString]!;
-      var currentValue = templateRow[templateColumnIndex];
-      var newValue = inputRow[c]!;
+    for (VagueString key in replaceColumns) {
+      int templateColumnIndex = indexes[key]!;
+      var currentValue = row[templateColumnIndex];
+      var newValue = inputRow[key]!;
 
       bool replace = true;
       if (currentValue.isNotEmpty) {
         log(
-          'The column for the user with title: "$title" and ssn: "${inputRow[PK]}" already has data in it:\n'
-          'data: $currentValue\n'
+          'The column for the user with title: "$title" and ssn: "${inputRow[_config.pk]}" already has data in it:\n'
+          'current data: $currentValue\n'
+          'new data: $newValue\n'
           'Should we replace $currentValue with $newValue\n'
           'Type "y" for yes or anything else for no',
         );
@@ -78,10 +74,10 @@ class TemplateManager {
       }
 
       if (replace) {
-        templateRow[templateColumnIndex] = newValue;
+        row[templateColumnIndex] = newValue;
       }
     }
 
-    return joinOnComma(templateRow);
+    return joinOnComma(row);
   }
 }
