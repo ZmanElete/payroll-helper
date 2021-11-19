@@ -8,9 +8,10 @@ class InputManager {
   List<FileSystemEntity> fseList;
   Map<String, Map<VagueString, Map<VagueString, String>>> rows = {};
   final Config _config;
-  VagueString lineKey = VagueString(key: 'line');
   List<String> dups = [];
   List<String> noId = [];
+
+  final lineKey = VagueString(key: 'line');
   final defaultTitle = VagueString(key: 'default-garbdge-that-wont-be-a-title');
 
   InputManager({required this.fseList, required Config config}) : _config = config {
@@ -79,8 +80,10 @@ class InputManager {
           Map<VagueString, String> _existingRow = pkRows.values.first;
           if (title == defaultTitle && pkRows.keys.first == defaultTitle) {
             log(
-              'ACTION RECOMMENDED: There are two job titles for the same user than are not handled in the config.csv\n'
-              ' - TITLES: ${_existingRow[_config.title]} and ${title}'
+              'ACTION REQUIRED: There are two job titles for the same user than are not handled in the config.csv\n'
+              ' - SSN: $pk - TITLES: ${_existingRow[_config.title]} and $titleString\n'
+              'To differenciate them, put the title from the template and the corrisponding title from the input file into\n'
+              'into the same row in the config.csv file.'
             );
           }
           if (_existingRow.isNotEmpty) {
