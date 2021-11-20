@@ -15,7 +15,6 @@ tips_only_titles,Kitchen Manager,Assistant General Manager
 #If you have a new/different job, just add it below in a new row. This will help separate people with multiple jobs
 #All jobs do NOT need to be included, if a job is not included here the job will be set to a default job
 #If someone has multiple jobs not included here, they will be counted as duplicates
-Kitchen Manager,KM
 Shift Lead,Shift Lead (Primary)
 MK Driver
 Front of House (Primary),Front of House,FOH

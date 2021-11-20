@@ -28,18 +28,7 @@ class TemplateFiller {
     required String outputDirPath,
   }) {
     String curr = Directory.current.path;
-    File configFile = File(curr + configPath)..createSync();
-    if (configFile.readAsStringSync().isEmpty) {
-      configFile.writeAsStringSync(
-        'ssn\n'
-        'regular_hours\n'
-        'overtime_hours\n'
-        'paycheck_tips\n'
-        'title\n'
-        'skip_titles\n'
-        'tips_only_titles\n',
-      );
-    }
+    File configFile = File(curr + configPath);
     Config config = Config(configFile);
     Directory inputDir = Directory(curr + inputDirPath)..createSync();
     Directory outputDir = Directory(curr + outputDirPath)..createSync();
@@ -132,7 +121,7 @@ class TemplateFiller {
 
     for (var titleRow in input.rows.values) {
       for (var row in titleRow.values) {
-        notFoundInTemplate.add(row[input.lineKey]?? '');
+        notFoundInTemplate.add(row[input.lineKey] ?? '');
       }
     }
     if (notFoundInTemplate.isNotEmpty) {
