@@ -9,6 +9,7 @@ class TemplateManager {
   File file;
   Map<VagueString, int> indexes = {};
   List<String> lines;
+  Set<String> dups = {};
 
   final Config _config;
   TemplateManager(
@@ -17,6 +18,7 @@ class TemplateManager {
   })  : _config = config,
         lines = file.readAsLinesSync() {
     setIndexes();
+    findDups();
   }
 
   void setIndexes() {
@@ -34,6 +36,19 @@ class TemplateManager {
       if (!indexes.containsKey(c)) {
         throw Exception('Column $c missing from template');
       }
+    }
+  }
+
+  void findDups() {
+    Map<String, String> keyLineMap = {};
+    for (String line in lines) {
+      var row = commaSeparatedSplit(line);
+      String pk = getColumn(_config.pk, row);
+      if (keyLineMap[pk] != null) {
+        dups.add(line);
+        dups.add(keyLineMap[pk]!);
+      }
+      keyLineMap[pk] = line;
     }
   }
 
@@ -70,8 +85,9 @@ class TemplateManager {
           'Should we replace $currentValue with $newValue\n'
           'Type "y" for yes or anything else for no',
         );
-        var response = stdin.readLineSync(encoding: utf8) ?? '';
-        replace = response.toLowerCase() == 'y';
+        // var response = stdin.readLineSync(encoding: utf8) ?? '';
+        // replace = response.toLowerCase() == 'y';
+        replace = false;
       }
 
       if (replace) {

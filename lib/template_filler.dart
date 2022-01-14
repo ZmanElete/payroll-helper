@@ -77,34 +77,21 @@ class TemplateFiller {
     for (String line in template.lines) {
       var row = commaSeparatedSplit(line);
       String pk = template.getColumn(config.pk, row);
-      String titleString = template.getColumn(config.title, row);
 
-      VagueString title = input.defaultTitle;
-      // Vague string overridden == so .contains works on strings
-      // ignore: iterable_contains_unrelated_type
-      if (config.titles.contains(titleString)) {
-        title = config.titles.firstWhere((t) => t.interpritations.contains(titleString));
-      } else if (noTitleIdSet.contains(pk)) {
-        log('ACTION REQUIRED: There is a repeat in ssn in this template file. To differenciate them\n'
-            'atleast one of the users titles should be put into the config.csv file\n'
-            'For this to work, the title from the template and the title from the input file should both be put in the same row\n'
-            ' - SSN: $pk | ONE OF THE TITLES: $titleString');
-      } else {
-        noTitleIdSet.add(pk);
-      }
+      Map<VagueString, String>? inputRow = input.getRow(pk);
 
-      Map<VagueString, String>? inputRow = input.getRow(pk, title);
-      if (inputRow != null && inputRow.isNotEmpty) {
-        outputLines.add(template.replaceColumns(row, inputRow));
-        // Vague string overridden == so .contains works on strings
-        // ignore: unrelated_type_equality_checks
-        input.rows.removeWhere((key, value) => key == pk && value == title);
+      String outputLine = line;
+      if (inputRow != null && inputRow.isNotEmpty && !template.dups.contains(line)) {
+        outputLine = template.replaceColumns(row, inputRow);
+        input.rows.removeWhere((key, value) => key == pk);
+      } else if (template.dups.contains(line)) {
+        input.rows.removeWhere((key, value) => key == pk);
       } else {
-        outputLines.add(line);
-        if (line != template.lines.first) {
+        if (line != template.lines.first && input.dups.where((String dup) => dup.contains(pk)).isEmpty) {
           log('Skipped Line in Template:  $line');
         }
       }
+      outputLines.add(outputLine);
     }
 
     DateTime now = DateTime.now();
@@ -119,10 +106,8 @@ class TemplateFiller {
       duplicates.writeAsStringSync(input.dups.join('\n') + '\n');
     }
 
-    for (var titleRow in input.rows.values) {
-      for (var row in titleRow.values) {
-        notFoundInTemplate.add(row[input.lineKey] ?? '');
-      }
+    for (var row in input.rows.values) {
+      notFoundInTemplate.add(row[input.lineKey] ?? '');
     }
     if (notFoundInTemplate.isNotEmpty) {
       File notFound = File(newOutputDir.path + '${s}not-found.csv');

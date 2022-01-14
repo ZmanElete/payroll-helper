@@ -23,7 +23,6 @@ class Config {
   late VagueString title;
   List<VagueString> columns = [];
   List<VagueString> titleOptions = [];
-  List<VagueString> titles = [];
 
   List<String> get columnNames => columns.fold([], (v, n) => v + n.interpritations.toList());
 
@@ -46,22 +45,11 @@ class Config {
             if (key == 'title') title = entry;
           } else if (titleOptionsKeys.contains(key)) {
             titleOptions.add(entry);
-          } else {
-            titles.add(entry);
           }
         }
       }
     }
     _checkForKeyExistence();
-  }
-
-  VagueString? getTitle(String string) {
-    var matches = titles.where(
-      (t) => t.interpritations.contains(string),
-    );
-    if (matches.isNotEmpty) {
-      return matches.first;
-    }
   }
 
   void _checkForKeyExistence() {
@@ -71,14 +59,6 @@ class Config {
       if (!columns.contains(c)) {
         String message = "No values for $c found in config";
         throw Exception(message);
-      }
-    }
-    for (var to in titleOptionsKeys) {
-      // ignored because VagueString overrides == to allow String comparison
-      // ignore: iterable_contains_unrelated_type
-      if (!titleOptions.contains(to)) {
-        String message = "No values for $to found in config";
-        log(message);
       }
     }
   }

@@ -6,13 +6,12 @@ import 'package:console_simple/vague_string.dart';
 
 class InputManager {
   List<FileSystemEntity> fseList;
-  Map<String, Map<VagueString, Map<VagueString, String>>> rows = {};
+  Map<String, Map<VagueString, String>> rows = {};
   final Config _config;
   List<String> dups = [];
   List<String> noId = [];
 
   final lineKey = VagueString(key: 'line');
-  final defaultTitle = VagueString(key: 'default-garbdge-that-wont-be-a-title');
 
   InputManager({required this.fseList, required Config config}) : _config = config {
     if (fseList.isEmpty) {
@@ -66,31 +65,19 @@ class InputManager {
       row[lineKey] = line;
 
       var pk = row[_config.pk]!;
-      var titleString = row[_config.title]!;
       if (pk != "") {
-        //See if the title exists in titles given. Otherwise use the default title.
-        var title = _config.getTitle(titleString) ?? defaultTitle;
         // We need to see if there are any rows that have this id already in our template rows to determine
         // if there is duplicate information that MUST be separated
-        Map<VagueString, Map<VagueString, String>>? pkRows = rows[pk];
-        if (pkRows == null || pkRows.isEmpty) {
+        Map<VagueString, String>? existingRow = rows[pk];
+        if (existingRow == null) {
           //No one with this id exists
-          setRow(pk, title, row);
+          setRow(pk, row);
         } else {
-          Map<VagueString, String> _existingRow = pkRows.values.first;
-          if (title == defaultTitle && pkRows.keys.first == defaultTitle) {
-            log(
-              'ACTION REQUIRED: There are two job titles for the same user than are not handled in the config.csv\n'
-              ' - SSN: $pk - TITLES: ${_existingRow[_config.title]} and $titleString\n'
-              'To differenciate them, put the title from the template and the corrisponding title from the input file into\n'
-              'into the same row in the config.csv file.'
-            );
-          }
-          if (_existingRow.isNotEmpty) {
-            dups.add(_existingRow[lineKey]!);
+          if (existingRow.isNotEmpty) {
+            dups.add(existingRow[lineKey]!);
             //Remove line from rows so that it is not added multiple times
             //keep key so odd numbers are still counted as dups
-            setRow(pk, title, {});
+            setRow(pk, {});
           }
           dups.add(line);
         }
@@ -101,18 +88,11 @@ class InputManager {
     }
   }
 
-  Map<VagueString, String>? getRow(String pk, VagueString title) {
-    Map<VagueString, Map<VagueString, String>>? pkRows = rows[pk];
-    if (pkRows != null) {
-      Map<VagueString, String>? row = pkRows[title];
-      if (row != null) {
-        return row;
-      }
-    }
+  Map<VagueString, String>? getRow(String pk) {
+    return rows[pk];
   }
 
-  void setRow(String pk, VagueString title, Map<VagueString, String> value) {
-    rows[pk] = rows[pk] ?? {};
-    rows[pk]![title] = value;
+  void setRow(String pk, Map<VagueString, String> value) {
+    rows[pk] = value;
   }
 }

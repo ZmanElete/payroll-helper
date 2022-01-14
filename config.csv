@@ -10,12 +10,3 @@ paycheck_tips,Total Tips
 skip_titles,General Manager,District Manager,MK Driver,Bar Manager (Primary),GM (Primary),General Manager (Primary),Chef de Cuisine (Primary)
 #People with these titles(in the template) will only get their paycheck_tips filled in
 tips_only_titles,Kitchen Manager,Assistant General Manager
-
-#Each column in the blow rows are job titles that should be treated as "the same job"
-#If you have a new/different job, just add it below in a new row. This will help separate people with multiple jobs
-#All jobs do NOT need to be included, if a job is not included here the job will be set to a default job
-#If someone has multiple jobs not included here, they will be counted as duplicates
-Shift Lead,Shift Lead (Primary)
-MK Driver
-Front of House (Primary),Front of House,FOH
-Back of House (Primary),Back of House,Cook,Dishwasher
