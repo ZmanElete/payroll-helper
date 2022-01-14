@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'vague_string.dart';
@@ -19,8 +20,6 @@ class TemplateManager {
     setIndexes();
     findDups();
   }
-
-  get utf8 => null;
 
   void setIndexes() {
     List<String> headers = commaSeparatedSplit(lines.first);
