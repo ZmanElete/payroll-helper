@@ -62,7 +62,7 @@ class TemplateFiller {
 
   /// List of inputLines with no match in template
   List<String> notFoundInTemplate = [];
-  Set<String> noTitleIdSet = {};
+  List<String> unsure = [];
 
   void run() {
     var inputFileEntities = inputDir.listSync().where((file) => file.path.contains('.csv'));
@@ -85,6 +85,9 @@ class TemplateFiller {
         outputLine = template.replaceColumns(row, inputRow);
         input.rows.removeWhere((key, value) => key == pk);
       } else if (template.dups.contains(line)) {
+        unsure.addAll([
+          if (inputRow != null && inputRow[input.lineKey] != null) inputRow[input.lineKey]!,
+        ]);
         input.rows.removeWhere((key, value) => key == pk);
       } else {
         if (line != template.lines.first && input.dups.where((String dup) => dup.contains(pk)).isEmpty) {
@@ -112,6 +115,11 @@ class TemplateFiller {
     if (notFoundInTemplate.isNotEmpty) {
       File notFound = File(newOutputDir.path + '${s}not-found.csv');
       notFound.writeAsStringSync(notFoundInTemplate.join('\n') + '\n');
+    }
+
+    if (unsure.isNotEmpty) {
+      File notFound = File(newOutputDir.path + '${s}unsure.csv');
+      notFound.writeAsStringSync(unsure.join('\n') + '\n');
     }
     print('Completed Press Enter to contine...');
     stdin.readLineSync(encoding: utf8);

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'vague_string.dart';
@@ -20,6 +19,8 @@ class TemplateManager {
     setIndexes();
     findDups();
   }
+
+  get utf8 => null;
 
   void setIndexes() {
     List<String> headers = commaSeparatedSplit(lines.first);
@@ -85,12 +86,12 @@ class TemplateManager {
           'Should we replace $currentValue with $newValue\n'
           'Type "y" for yes or anything else for no',
         );
-        // var response = stdin.readLineSync(encoding: utf8) ?? '';
-        // replace = response.toLowerCase() == 'y';
-        replace = false;
+        var response = stdin.readLineSync(encoding: utf8) ?? '';
+        replace = response.toLowerCase() == 'y';
       }
 
       if (replace) {
+        newValue = newValue.replaceAll('\$', '');
         row[templateColumnIndex] = newValue;
       }
     }
